@@ -1,4 +1,3 @@
 mido
 pygame
 numpy
-pyinstaller

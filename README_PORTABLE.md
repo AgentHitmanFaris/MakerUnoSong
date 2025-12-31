@@ -1,47 +1,33 @@
-# Portable MIDI to Arduino Converter - Build Instructions
+# Portable MIDI to Arduino Converter
+**One-Click Windows Application**
 
-## Requirements
-To run the source code directly, you need:
-- Python 3.x
-- Dependencies: `pip install -r requirements.txt`
+## Usage
+1. Download the **Windows x86-64 embeddable zip** package from Python.org (e.g., Python 3.11.x).
+2. Extract the zip file to a folder.
+3. Place the contents of this repository (all files) into the **same folder** as the extracted Python files (where `python.exe` is located).
+4. Double-click `run_portable.bat`.
 
-## Running with Python Embedded
-If you are using the "Python Embedded" distribution (a zip file of Python):
-1. Ensure the `python-3.x.x-embed-amd64.zip` is extracted.
-2. By default, `tkinter` is NOT included in the embedded distribution. You must:
-   - Copy the `tcl` folder and `tk` folder from a full Python installation to the embedded folder.
-   - Copy `_tkinter.pyd`, `tcl86t.dll`, `tk86t.dll` (versions may vary) to the embedded folder or `Lib` folder.
-3. **Important**: Open the `python3x._pth` file (e.g., `python311._pth`) in the embedded folder and uncomment the line `#import site`. This allows Python to load modules installed by pip.
-4. Install dependencies (`mido`, `pygame`, `numpy`) into the embedded python environment.
-   - Since `pip` is not installed by default, download `get-pip.py` and run `python get-pip.py`.
-   - Then run `python -m pip install -r requirements.txt`.
-5. Run the application:
-   ```bash
-   python main.py
-   ```
-
-## Creating a Portable Windows Executable (Recommended)
-The easiest way to make a "portable" application that doesn't require the user to manage Python is to use PyInstaller.
-
-1. Install PyInstaller:
-   ```bash
-   pip install pyinstaller
-   ```
-2. Build the EXE:
-   ```bash
-   pyinstaller --onefile --noconsole --name "MidiToArduino" main.py
-   ```
-   - `--onefile`: bundles everything into a single `.exe`.
-   - `--noconsole`: hides the black command prompt window.
-3. The result will be in the `dist` folder: `MidiToArduino.exe`.
-   You can move this file anywhere (USB drive, another PC), and it will run without installation.
+## What happens next?
+- The script will automatically detect if `pip` is missing and download it.
+- It will install necessary libraries (`pygame`, `mido`, `numpy`) directly into the local folder.
+- It will launch the application.
+- **No administrative privileges required.**
+- **No changes to your system drive.**
 
 ## Features
-- **Load MIDI**: Import standard .mid files.
+- **Load MIDI**: Open standard `.mid` files using native Windows dialogs.
 - **Editor**:
-  - View notes on a Piano Roll.
-  - **Select**: Click a note (turns red).
-  - **Move**: Drag notes to change start time (X) or pitch (Y).
-  - **Delete**: Press `Delete` key to remove selected note.
-- **Preview**: Click "Play Preview" to hear the melody (simulated square wave).
-- **Export**: Save as `.ino` file for Maker UNO.
+  - Visual Piano Roll interface.
+  - **Left Click**: Select Note.
+  - **Right Click**: Create Note.
+  - **Drag**: Move notes (Time/Pitch).
+  - **Drag Edge**: Resize notes (Duration).
+  - **Delete**: Remove selected notes.
+  - **Scroll**: Use Mouse Wheel (Vertical) or drag.
+- **Preview**: Real-time audio playback simulation of the Arduino buzzer.
+- **Export**: Generates `.ino` code compatible with Maker UNO / Arduino (Tone library).
+
+## Requirements (for Manual Run)
+- Python 3.x
+- `pip install -r requirements.txt`
+- Windows (for native file dialogs)
