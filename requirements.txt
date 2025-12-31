@@ -1,1 +1,4 @@
 mido
+pygame
+numpy
+pyinstaller
