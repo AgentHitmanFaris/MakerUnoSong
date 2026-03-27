@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import time
 
-# Attempt to import native dialogs; fallback or error if on non-Windows (though requirements say Windows)
+# Attempt to import native dialogs; fallback to standard input if on non-Windows
 try:
     import windows_dialogs
 except ImportError:
@@ -94,11 +94,13 @@ class MidiEditorApp:
         ]
 
     def load_midi(self):
-        if not windows_dialogs:
+        path = None
+        if windows_dialogs:
+            path = windows_dialogs.open_file_dialog("Load MIDI", "MIDI Files", "*.mid;*.midi")
+        else:
             print("Native dialogs not available.")
-            return
+            path = input("Enter path to MIDI file to load: ").strip()
 
-        path = windows_dialogs.open_file_dialog("Load MIDI", "MIDI Files", "*.mid;*.midi")
         if path:
             try:
                 self.converter.load_midi(path)
@@ -108,10 +110,13 @@ class MidiEditorApp:
                 print(f"Error loading MIDI: {e}")
 
     def export_arduino(self):
-        if not windows_dialogs:
-            return
+        path = None
+        if windows_dialogs:
+            path = windows_dialogs.save_file_dialog("Export Arduino", "Arduino Sketch", "*.ino", "ino")
+        else:
+            print("Native dialogs not available.")
+            path = input("Enter path to export Arduino Sketch (.ino): ").strip()
 
-        path = windows_dialogs.save_file_dialog("Export Arduino", "Arduino Sketch", "*.ino", "ino")
         if path:
             try:
                 # Ensure extension
@@ -248,7 +253,7 @@ class MidiEditorApp:
 
         if freq != self.current_freq:
             if self.sound_channel:
-                self.sound_channel.stop()
+                self.sound_channel.fadeout(30)
                 self.sound_channel = None
 
             if freq > 0:
@@ -257,13 +262,13 @@ class MidiEditorApp:
                 # Square wave
                 arr = self.generate_square_wave(freq, 500) # 0.5s buffer
                 snd = pygame.sndarray.make_sound(arr)
-                self.sound_channel = snd.play(loops=-1) # Loop indefinitely
+                self.sound_channel = snd.play(loops=-1, fade_ms=30) # Loop indefinitely
 
             self.current_freq = freq
 
         # If cursor passed end
         if self.play_cursor_ms > self.converter.total_duration + 500:
-            if self.sound_channel: self.sound_channel.stop()
+            if self.sound_channel: self.sound_channel.fadeout(30)
             self.playing = False
             self.current_freq = 0
 
