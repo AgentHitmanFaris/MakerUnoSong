@@ -15,7 +15,7 @@ def main():
 
     notes_output = [] # (frequency, duration_ms)
 
-    current_note = None
+    active_pitches = []
 
     # Iterate through the MidiFile object directly.
     # This yields messages with 'time' converted to seconds (delta time).
@@ -26,15 +26,15 @@ def main():
             duration_ms = int(dt * 1000)
             if duration_ms > 0:
                 freq = 0
-                if current_note is not None:
-                    freq = note_to_freq(current_note)
+                if active_pitches:
+                    freq = note_to_freq(active_pitches[-1])
                 notes_output.append((freq, duration_ms))
 
         if msg.type == 'note_on' and msg.velocity > 0:
-            current_note = msg.note
+            active_pitches.append(msg.note)
         elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
-            if current_note == msg.note:
-                current_note = None
+            if msg.note in active_pitches:
+                active_pitches.remove(msg.note)
 
     # Generate Arduino Code
     header = """/*
