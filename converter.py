@@ -27,8 +27,19 @@ class MidiConverter:
         
         # Extract Meta information first before any destructive filtering
         import os
-        self.song_name = os.path.basename(filepath)
+        import re
+        
+        base_filename = os.path.splitext(os.path.basename(filepath))[0]
+        self.song_name = base_filename
         self.artist = "Unknown"
+        
+        # Check for "Song (Artist)" pattern in filename
+        match = re.match(r"(.*)\s*\((.*)\)", base_filename)
+        filename_found = False
+        if match:
+            self.song_name = match.group(1).strip()
+            self.artist = match.group(2).strip()
+            filename_found = True
 
         for track in mid.tracks:
             for msg in track:
@@ -39,22 +50,23 @@ class MidiConverter:
                 elif msg.type == 'key_signature':
                     self.key_signature = msg.key
                 elif msg.type == 'track_name':
-                    if self.song_name.endswith('.mid') or self.song_name.endswith('.midi'):
-                        self.song_name = msg.name
+                    # Only use track_name if we didn't find a clean Song/Artist in the filename
+                    # This prevents "Piano" from overwriting "Die On This Hill"
+                    if not filename_found:
+                        if msg.name.strip() and not msg.name.lower().endswith(('.mid', '.midi')):
+                            self.song_name = msg.name
                 elif msg.type == 'text' and "artist" in msg.text.lower():
                     self.artist = msg.text
-                elif msg.type == 'copyright' and self.artist == "Unknown":
+                elif msg.type == 'copyright' and (self.artist == "Unknown" or not filename_found):
                     self.artist = msg.text
-        
-
 
         self.notes = []
-
         temp_notes = []
         active_starts = {} # pitch -> start_time_ms
         abs_time_ms = 0.0
 
-        for msg in mid:
+        # Re-open file to get absolute time (seconds) via mido's built-in iterator
+        for msg in mido.MidiFile(filepath):
             dt_ms = msg.time * 1000
             abs_time_ms += dt_ms
 
@@ -76,6 +88,13 @@ class MidiConverter:
 
         self.notes = sorted(temp_notes, key=lambda x: x['start'])
         self.update_duration()
+
+    def get_project_name(self):
+        """Returns a safe, underscore-separated name for folders/files."""
+        name = f"{self.song_name}_{self.artist}"
+        import re
+        safe = re.sub(r'[^\w\s]', '', name)
+        return safe.replace(" ", "_")
 
     def update_duration(self):
         if not self.notes:
@@ -249,6 +268,25 @@ class MidiConverter:
                 optimized_segments[-1] = (freq, optimized_segments[-1][1] + duration)
             else:
                 optimized_segments.append((freq, duration))
+
+        # Filter out inaudibly short segments (< 5ms) and merge their time into adjacent notes
+        final_segments = []
+        for freq, duration in optimized_segments:
+            if duration < 5 and final_segments:
+                # Too short to hear, merge duration into previous segment
+                prev_f, prev_d = final_segments[-1]
+                final_segments[-1] = (prev_f, prev_d + duration)
+            else:
+                final_segments.append((freq, duration))
+
+        # Hard cap: Arduino UNO has 32KB flash. Each entry = 4 bytes. 
+        # ~2KB for code overhead, leaving ~30KB = ~7500 max entries. Use 7000 for safety.
+        MAX_SEGMENTS = 7000
+        if len(final_segments) > MAX_SEGMENTS:
+            print(f"WARNING: Song has {len(final_segments)} segments, truncating to {MAX_SEGMENTS} to fit Arduino memory.")
+            final_segments = final_segments[:MAX_SEGMENTS]
+
+        optimized_segments = final_segments
 
         count = 0
         note_count = 0

@@ -140,16 +140,36 @@ class MainWindow(QMainWindow):
         if not self.converter.notes:
             QMessageBox.warning(self, "Warning", "Please load a MIDI file first.")
             return
+
+        # Prepare metadata metadata for naming
+        self.converter.song_name = self.input_song.text().strip()
+        self.converter.artist = self.input_artist.text().strip()
+        project_name = self.converter.get_project_name()
+
+        # Ask for root directory (default to Songs)
+        default_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Songs")
+        if not os.path.exists(default_root):
+            os.makedirs(default_root)
             
-        path, _ = QFileDialog.getSaveFileName(self, "Save Arduino Sketch", "MakerUnoMelody.ino", "Arduino Sketch (*.ino)")
-        if path:
+        # Target folder and filename
+        target_folder = os.path.join(default_root, project_name)
+        target_file = os.path.join(target_folder, f"{project_name}.ino")
+        
+        # Confirmation Dialog
+        reply = QMessageBox.question(self, "Export Confirmation", 
+                                   f"This will export to:\n{target_file}\n\nProceed?",
+                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        
+        if reply == QMessageBox.StandardButton.Yes:
             try:
-                self.converter.song_name = self.input_song.text()
-                self.converter.artist = self.input_artist.text()
+                if not os.path.exists(target_folder):
+                    os.makedirs(target_folder)
+                    
                 self.converter.enable_drums = self.chk_drums.isChecked()
                 self.converter.drum_mode = self.combo_drums.currentText()
-                self.converter.export_arduino(path)
-                QMessageBox.information(self, "Success", "Exported successfully!")
+                self.converter.export_arduino(target_file)
+                
+                QMessageBox.information(self, "Success", f"Exported successfully to:\n{target_folder}")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to export: {e}")
 
