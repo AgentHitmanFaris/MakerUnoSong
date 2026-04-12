@@ -193,9 +193,12 @@ class MainWindow(QMainWindow):
             # Wait until it's time for this note
             time_to_play = note['start'] / 1000.0
             
-            while time.time() - start_time < time_to_play:
+            while True:
+                time_to_wait = time_to_play - (time.time() - start_time)
+                if time_to_wait <= 0: break
                 if not self.playing: return
-                time.sleep(0.005)
+                # Optimized waiting: sleep in larger chunks to reduce CPU wakeups
+                time.sleep(min(time_to_wait, 0.05))
                 
             freq = self.converter.note_to_freq(note['pitch'])
             # WinSound requires freq between 37 and 32767
