@@ -1,6 +1,7 @@
 import mido
 import sys
 import argparse
+import os
 
 def note_to_freq(note):
     return int(440 * (2 ** ((note - 69) / 12)))
@@ -16,7 +17,6 @@ def main():
     time_signature = "4/4"
     key_signature = "C"
     
-    import os
     song_name = os.path.basename(args.input_file)
     artist = "Unknown"
 
