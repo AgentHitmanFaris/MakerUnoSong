@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QPushButton, QFileDialog, QGraphicsView,
                              QGraphicsScene, QGraphicsRectItem, QLabel, QMessageBox,
                              QLineEdit, QFormLayout, QCheckBox, QComboBox)
-from PyQt6.QtCore import Qt, QRectF
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QBrush, QColor, QPen
 
 class PianoRollView(QGraphicsView):

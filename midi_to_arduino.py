@@ -1,8 +1,9 @@
 import mido
-import sys
+import functools
 import argparse
 import os
 
+@functools.lru_cache(maxsize=128)
 def note_to_freq(note):
     return int(440 * (2 ** ((note - 69) / 12)))
 
@@ -20,7 +21,6 @@ def main():
     bpm = 120
     time_signature = "4/4"
     key_signature = "C"
-    
     song_name = os.path.basename(args.input_file)
     artist = "Unknown"
 
@@ -108,17 +108,15 @@ def main():
         else:
             optimized_notes.append((freq, duration))
 
-    count = 0
-    for freq, duration in optimized_notes:
-        melody_array += f"  {freq}, "
-        duration_array += f"  {duration}, "
-        count += 1
-        if count % 10 == 0:
-            melody_array += "\n"
-            duration_array += "\n"
+    melody_rows = []
+    duration_rows = []
+    for i in range(0, len(optimized_notes), 10):
+        chunk = optimized_notes[i : i + 10]
+        melody_rows.append("  " + ", ".join(str(f) for f, d in chunk))
+        duration_rows.append("  " + ", ".join(str(d) for f, d in chunk))
 
-    melody_array = melody_array.rstrip(", \n") + "\n};\n"
-    duration_array = duration_array.rstrip(", \n") + "\n};\n"
+    melody_array += ",\n".join(melody_rows) + "\n};\n"
+    duration_array += ",\n".join(duration_rows) + "\n};\n"
 
     setup_loop = f"""
 // --- TO ADJUST TEMPO: Increase for FASTER, decrease for SLOWER ---
