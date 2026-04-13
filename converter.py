@@ -1,5 +1,7 @@
 import mido
 import math
+import os
+import re
 
 class MidiConverter:
     def __init__(self):
@@ -26,8 +28,6 @@ class MidiConverter:
         mid = mido.MidiFile(filepath)
         
         # Extract Meta information first before any destructive filtering
-        import os
-        import re
         
         base_filename = os.path.splitext(os.path.basename(filepath))[0]
         self.song_name = base_filename
@@ -92,7 +92,6 @@ class MidiConverter:
     def get_project_name(self):
         """Returns a safe, underscore-separated name for folders/files."""
         name = f"{self.song_name}_{self.artist}"
-        import re
         safe = re.sub(r'[^\w\s]', '', name)
         return safe.replace(" ", "_")
 
