@@ -22,6 +22,7 @@ Guess what? I just stumbled upon the Maker UNO by Cytron Technologies—a snazzy
 - **Smart Filename Parsing**: Automatically extracts Song Name and Artist from filenames like `Song Name (Artist).mid` and populates the UI fields.
 - **Organized Export**: Exports `.ino` files into a structured `Songs/Song_Name_Artist/` folder hierarchy, ready for Arduino IDE.
 - **Triple-Layer Memory Optimization**: Sequence merging, micro-segment filtering, and a hard 7000-entry safety cap ensure every song fits within the Arduino UNO's 32KB flash limit.
+- **Performance Optimized Engine**: Single-pass MIDI parsing and LRU-cached frequency lookups provide near-instant processing, even for complex musical scores with thousands of notes.
 
 ## Technologies Used
 
@@ -55,6 +56,7 @@ Click the **Load MIDI** button and choose any Standard MIDI File (.mid or .midi)
 *   **Export .INO**: Automatically creates a `Songs/Song_Artist/Song_Artist.ino` folder structure. If the song exceeds memory, it auto-truncates with a warning.
 
 ## Changelog
+- **v2.2.0** - Core performance overhaul: Single-pass MIDI parsing, LRU-cached frequency calculations, and linear string joining for massive speed boosts. Integrated modular test suite for core logic and GUI reliability.
 - **v2.1.0** - Smart filename parsing for Song/Artist, organized `Songs/` export folder structure, triple-layer memory optimization with auto-truncation safety cap.
 - **v2.0.0** - PyQt6 Desktop GUI, Melody-Weighted Arpeggiator, White Noise Drum Synthesis, Auto-Gen Drum Loops (7 genres).
 - **v1.3.0** - Added Web Serial API support for hardware communication.
