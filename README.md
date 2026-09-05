@@ -1,66 +1,139 @@
 <div align="center">
 
-# MakerUnoSong
+# MakerUnoSong Studio v3.5.0
 
 <p align="center">
-  A highly optimized MIDI to Arduino converter specifically designed for the Maker UNO's built-in buzzer!
+  <b>Advanced MIDI to Maker UNO Studio with Intelligent Beat Structuring, Built-in Audio & Hardware Preview, 1-Click Fully Automated Pipeline & Real-Time Board Diagnostics!</b>
 </p>
 
 </div>
 
 ---
 
-Guess what? I just stumbled upon the Maker UNO by Cytron Technologies—a snazzy replacement for the classic Arduino Uno! And guess what makes it even cooler? It's got a built-in buzzer! So, naturally, my brain went into creative overdrive, and voila, the birth of this project!
+Designed specifically for the **Maker UNO** (by Cytron Technologies) and standard **Arduino UNO** (ATmega328P).
 
-## Features
+## 🚀 What's New in v3.5.0
 
-- **Pro Desktop Editor**: A sleek PyQt6 desktop application with an interactive graphical Piano Roll.
-- **Melody-Weighted Arpeggiator**: Emulates polyphony on a monophonic buzzer by rapidly alternating between notes, giving double playtime to the melody so it always stands out over the harmony.
-- **White Noise Drum Synthesis**: Snare and Hi-Hat hits are rendered as true white noise directly on the Arduino using rapid random-bit generation — not just simple beeps.
-- **Auto-Gen Drum Loops**: Generate tempo-synced drum patterns in 7 genres: Pop, Rock, Metal, Funk, Disco, Hip-Hop, and Reggae. Or use the original MIDI percussion track.
-- **Instant Preview**: Built-in `winsound` square-wave audio synthesis replicating the exact buzzer sound.
-- **Smart Filename Parsing**: Automatically extracts Song Name and Artist from filenames like `Song Name (Artist).mid` and populates the UI fields.
-- **Organized Export**: Exports `.ino` files into a structured `Songs/Song_Name_Artist/` folder hierarchy, ready for Arduino IDE.
-- **Triple-Layer Memory Optimization**: Sequence merging, micro-segment filtering, and a hard 7000-entry safety cap ensure every song fits within the Arduino UNO's 32KB flash limit.
-- **Performance Optimized Engine**: Single-pass MIDI parsing and LRU-cached frequency lookups provide near-instant processing, even for complex musical scores with thousands of notes.
+### 1. 🧠 Intelligent Structural Beat Engine (Beyond Static Presets)
+- **Rhythm Thinking, Not Just Looping**: Analyzes musical energy, note density, tempo, and measure cadences rather than mechanically repeating static presets.
+- **Section-Aware Drum Synthesis**: Automatically classifies songs into structural phases:
+  - `INTRO`: Subtle downbeat kick, delicate hi-hat ticks.
+  - `VERSE`: Steady foundational groove supporting the melody.
+  - `PRE-CHORUS`: Rising energy, driving four-on-the-floor kicks, building snare rolls.
+  - `CHORUS / CLIMAX`: Dynamic syncopated kicks locking in with melodic accents, crisp backbeat snares, open hi-hat drive.
+  - `BRIDGE / BREAKDOWN`: Dramatic contrast, half-time snares, kick dropouts.
+  - `OUTRO`: Decelerating groove resolving to final chord.
+- **Context-Aware Cadence Fills**: Detects 4-bar and 8-bar boundaries and structural section transitions, inserting authentic drum fills (16th-note snare rolls and syncopated kick turnarounds).
+- **Musical Key & Harmonic Intelligence**: Uses Krumhansl-Schmuckler pitch class profiling to automatically detect the song's key and mode (e.g. C Major, A Minor).
 
-## Technologies Used
+### 2. 🎧 Built-in Audio & Real-Time Virtual Hardware Preview
+- **High-Performance Audio Synthesizer**: Generates authentic in-memory 16-bit PCM WAV audio:
+  - Monophonic square-wave piezo buzzer tone.
+  - Sub-bass kick transients (135Hz → 42Hz frequency downward glide).
+  - White noise snare bursts with resonant body.
+  - Crisp high-pass filtered metallic hi-hats.
+- **Non-Blocking Asynchronous Playback**: Uses zero-lag audio streaming with instant play/pause/seek controls and tempo scaling (0.5x to 2.0x).
+- **Virtual Maker UNO Hardware Visualizer**: Real-time simulated onboard hardware panel featuring:
+  - 12 Dynamic Status LEDs (Pins 2 to 13) glowing in sync with playback.
+  - Pin 8 Piezo Buzzer frequency ripple display.
+  - Pin 2 Button state indicator.
+- **Interactive Piano Roll with Zoom & Auto-Scroll**: Multi-colored register/drum tracks with animated playhead, horizontal time-axis Zoom (buttons + Ctrl+Wheel), horizontal panning (Shift/Alt+Wheel), 1:1 reset, and real-time Auto-Scroll tracking.
+- **WAV Audio Export**: Export synthesized preview audio directly to `.wav` files via GUI or CLI (`--preview-wav`).
 
-- **[Python 3.12](https://www.python.org/)** - Core launcher, arpeggiator calculation, and memory optimization.
-- **[PyQt6](https://pypi.org/project/PyQt6/)** - Native, lightning-fast cross-platform desktop UI framework.
-- **[mido](https://mido.readthedocs.io/)** - For seamless, precision track, channel, and tempo parsing from raw Standard MIDI Files.
+### 3. ⚡ Fully Automated 1-Click Pipeline
+- **Zero-Configuration Workflow**:
+  - **In GUI**: Click **"⚡ 1-Click Auto Pipeline"** to auto-analyze structure, generate adaptive beats, detect connected Maker UNO port, compile, and flash directly.
+  - **In CLI**: Run `python midi_to_arduino.py "song.mid" --auto` for hands-free compilation and upload.
+- **Batch Processing**: Convert entire directories of MIDI files in one command (`--batch <DIR>`).
+- **4 Selectable LED Visualizer Modes**:
+  - `Frequency Mapped` (Default): Frequency-to-pin mapping (130Hz - 2000Hz).
+  - `VU Meter`: Dynamic bar-graph volume/pitch meter across pins 2–13.
+  - `Knight Rider Scanner`: High-speed Larson Scanner chasing across LEDs on musical beats.
+  - `Drum Reactive`: Dedicated split (Pins 3–5 Kick, Pins 6–8 Snare, Pins 10–12 Hi-Hat).
 
-## Getting Started & Walkthrough
+### 4. 🩺 Real-Time Board Health & Life Monitor
+- **Internal 1.1V Bandgap Vcc Voltage Reference**: Detects USB voltage sags (<4.75V).
+- **ATmega328P Core Die Temperature**: Monitors internal MCU temperature via ADC channel 8.
+- **Dynamic SRAM Headroom**: Tracks available memory out of 2048 bytes of SRAM to prevent stack collision.
+- **Non-Volatile EEPROM Integrity Check**: Validates memory cell retention without excessive wear.
+- **16MHz Oscillator Latency & Jitter**: Measures real-time loop timing and crystal stability.
+- **Interactive Peripheral Self-Test**: Test 12x LEDs (pins 2–13), Buzzer sweep (pin 8), and Button responses (pin 2).
+- **Board Health Life Score**: 0–100% health score (Grade A/B/C/F) with telemetry logs.
 
-### 1. Launching the App
-Ensure you have Python installed along with `mido` and `PyQt6`, then simply run the launcher script from the root directory:
+---
+
+## 🛠️ Technologies Used
+
+- **[Python 3.11+](https://www.python.org/)** - Core engine, MIDI parsing, and synthesis algorithms.
+- **[PySide6 / PyQt6](https://pypi.org/project/PySide6/)** - Modern dark-themed cyber desktop GUI.
+- **[pyserial](https://pypi.org/project/pyserial/)** - Serial communication and telemetry protocol.
+- **[mido](https://mido.readthedocs.io/)** - High-precision MIDI track and meta-event parsing.
+
+---
+
+## 📖 Getting Started
+
+### 1. Installation
+Install the required dependencies:
+```powershell
+pip install -r requirements.txt
+```
+
+### 2. Launching the Desktop Studio
+Run the GUI application:
 ```powershell
 python main.py
 ```
-This will open the dark-mode Fusion styled desktop application.
 
-### 2. Loading a MIDI File
-Click the **Load MIDI** button and choose any Standard MIDI File (.mid or .midi).
-- Files named like `Die On This Hill (Sienna Spiro).mid` will auto-fill **Song Name** and **Artist** fields.
-- The Piano Roll will visualize all notes from every track.
+### 3. CLI Usage
 
-### 3. Setting Song Properties
-*   **Song Name & Artist**: Auto-detected from filename or MIDI metadata. Editable before export — values are embedded directly into the `.ino` header.
-*   **Drums**: Choose how to handle rhythm!
-    *   *Disable Drums*: Uncheck the box for a clean melodic-only export.
-    *   *Use MIDI Track*: Maps MIDI Channel 10 percussion into white noise kick/snare/hi-hat.
-    *   *Auto-Gen (7 genres)*: Pop, Rock, Metal, Funk, Disco, Hip-Hop, Reggae — fully synced to BPM.
+#### ⚡ Fully Automated Pipeline (Analyze, Smart Beat, Auto-Detect Port & Flash):
+```powershell
+python midi_to_arduino.py "MySong (Artist).mid" --auto
+```
 
-### 4. Preview and Export
-*   **Play Preview**: Hear a square-wave emulation of how the arpeggiated output will sound on the buzzer.
-*   **Export .INO**: Automatically creates a `Songs/Song_Artist/Song_Artist.ino` folder structure. If the song exceeds memory, it auto-truncates with a warning.
+#### 🎵 Analyze Musical Structure & Export Audio Preview (.WAV):
+```powershell
+python midi_to_arduino.py "MySong (Artist).mid" --analyze --preview-wav "preview.wav"
+```
 
-## Changelog
-- **v2.2.0** - Core performance overhaul: Single-pass MIDI parsing, LRU-cached frequency calculations, and linear string joining for massive speed boosts. Integrated modular test suite for core logic and GUI reliability.
-- **v2.1.0** - Smart filename parsing for Song/Artist, organized `Songs/` export folder structure, triple-layer memory optimization with auto-truncation safety cap.
-- **v2.0.0** - PyQt6 Desktop GUI, Melody-Weighted Arpeggiator, White Noise Drum Synthesis, Auto-Gen Drum Loops (7 genres).
-- **v1.3.0** - Added Web Serial API support for hardware communication.
-- **v1.2.0** - Transitioned interface to initial Web GUI rendering.
+#### 📁 Batch Convert All MIDI Files in a Folder:
+```powershell
+python midi_to_arduino.py --batch "C:\Path\To\Midis"
+```
+
+#### 💡 Choose Custom LED Mode:
+```powershell
+python midi_to_arduino.py "MySong (Artist).mid" --led-mode "Knight Rider Scanner" --upload COM3
+```
+
+#### 🩺 Run Real-Time Board Health Diagnostics:
+```powershell
+python midi_to_arduino.py --health-check COM3
+```
 
 ---
-*Maintained under clinical security audit logging protocols.*
+
+## 🧪 Running Unit Tests
+To verify all 34 unit tests:
+```powershell
+python -m unittest discover -v
+```
+
+---
+
+## 📋 Changelog
+- **v3.5.0** - **Major Boost Release**:
+  - **Intelligent Beat Structuring Engine (`smart_beat.py`)**: Musical energy curve analysis, section classification (Intro, Verse, Chorus, Bridge, Outro), melody-locked kicks, and context-aware cadence fills.
+  - **Built-in Audio Preview Engine (`audio_preview.py`)**: High-performance PCM WAV synthesizer for melody square wave and white noise drum kits (kick, snare, hi-hat), with non-blocking playback, seeking, and WAV export.
+  - **Virtual Maker UNO Hardware Visualizer**: Real-time simulated 12x LEDs, Pin 8 buzzer, and Pin 2 button animation in GUI.
+  - **Interactive Piano Roll**: Animated playhead cursor, note scrubbing, and color-coded pitch registers.
+  - **1-Click Auto Pipeline**: Fully automated 1-click execution in GUI and `--auto` in CLI.
+  - **Batch Conversion & Analysis**: `--batch <DIR>` and `--analyze` flags.
+  - **4 LED Visualizer Modes**: Frequency Mapped, VU Meter, Knight Rider Scanner, and Drum Reactive.
+  - Complete test suite expanded from 17 to 34 tests passing.
+- **v3.0.0**: Standalone Direct Uploader, Board Health Diagnostics, Maker UNO 12x LED Sync.
+- **v2.2.0**: Single-pass MIDI parsing, LRU-cached frequency calculations.
+
+---
+*Maintained by AgentHitmanFaris (NC-Engineering).*

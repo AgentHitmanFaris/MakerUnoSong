@@ -1,161 +1,229 @@
-import mido
-import functools
-import argparse
+"""
+MakerUnoSong - CLI Converter, Direct Flasher & Health Diagnostics.
+Build by AgentHitmanFaris (NC-Engineering).
+
+CLI tool for converting MIDI files, intelligent beat structuring, audio preview synthesis,
+direct flashing to Maker UNO without Arduino IDE, batch processing, and board health diagnostics.
+"""
+
+import sys
 import os
+import glob
+import argparse
+import time
 
-@functools.lru_cache(maxsize=128)
-def note_to_freq(note):
-    return int(440 * (2 ** ((note - 69) / 12)))
+# Ensure Windows command line handles UTF-8 safely without charmap crashes
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 
-def sanitize_cpp_comment(text):
-    """Sanitize input to prevent C++ block comment injection."""
-    return str(text).replace("*/", "* /")
+# Ensure module imports work
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from converter import MidiConverter, note_to_freq
+from uploader import ArduinoUploader
+from board_health import BoardHealthEngine
+
+def run_health_check_cli(port: str):
+    print(f"\n🩺 Starting Maker UNO Health Diagnostics on {port}...")
+    engine = BoardHealthEngine()
+    
+    received_count = 0
+    def _on_telemetry(data):
+        nonlocal received_count
+        if "score" in data:
+            received_count += 1
+            print("\n" + "="*55)
+            print(f"  Maker UNO Board Health: {data['score']}% [{data['grade']}]")
+            print("="*55)
+            print(f"  ⚡ Supply Voltage (Vcc) : {data['vcc_v']:.3f} V  ({data['status_vcc']})")
+            print(f"  🌡️  MCU Core Temp        : {data['temp_c']:.1f} °C  ({data['status_temp']})")
+            print(f"  💾 Free Dynamic SRAM    : {data['free_ram']} / 2048 Bytes ({data['ram_percent']}%)")
+            print(f"  💾 EEPROM Storage       : {data['status_eeprom']}")
+            print(f"  ⏱️  Loop Timing Jitter   : {data['jitter_ms']:.2f} ms ({data['status_clock']})")
+            print(f"  🔘 Button State (Pin 2) : {'PRESSED' if data['btn_pressed'] else 'RELEASED'}")
+            print(f"  ⏱️  Board Uptime         : {data['uptime_s']} s")
+            print("-"*55)
+            print(f"  Summary: {data['summary']}")
+            if data['issues']:
+                print(f"  ⚠️  Issues Detected:")
+                for issue in data['issues']:
+                    print(f"     - {issue}")
+            print("="*55)
+        elif "error" in data:
+            print(f"  ❌ Error: {data['error']}")
+        elif "raw" in data:
+            print(f"  >> {data['raw']}")
+
+    engine.start_monitoring(port, callback=_on_telemetry)
+    print("Listening for telemetry packets (Press Ctrl+C to stop)...")
+    try:
+        while True:
+            time.sleep(1)
+            if received_count >= 3:
+                pass
+    except KeyboardInterrupt:
+        print("\nStopping health monitoring...")
+    finally:
+        engine.stop_monitoring()
+
+def process_single_midi(midi_file: str, out_file: str = None, drum_mode: str = "Smart Adaptive AI",
+                        no_drums: bool = False, led_mode: str = "Frequency Mapped",
+                        preview_wav: str = None, analyze: bool = False):
+    converter = MidiConverter()
+    print(f"\n📂 Reading MIDI file: {midi_file}")
+    converter.load_midi(midi_file)
+
+    if no_drums:
+        converter.enable_drums = False
+    elif drum_mode == "Smart Adaptive AI" or "Smart" in drum_mode:
+        converter.enable_drums = True
+        converter.drum_mode = "🧠 Smart Adaptive AI"
+    elif drum_mode != "Use MIDI Track":
+        converter.enable_drums = True
+        converter.drum_mode = f"Auto-Gen: {drum_mode}"
+    else:
+        converter.enable_drums = True
+        converter.drum_mode = "Use MIDI Track"
+
+    converter.led_mode = led_mode
+
+    # Musical Analysis Output
+    analysis = converter.analyze_song_structure()
+    flash_info = converter.get_flash_usage_estimate()
+
+    if analyze or True:
+        print("="*58)
+        print(f"  🎵 SONG ANALYSIS: '{converter.song_name}' by '{converter.artist}'")
+        print("="*58)
+        print(f"  Tempo / BPM      : {converter.bpm} BPM")
+        print(f"  Time Signature   : {converter.time_signature}")
+        print(f"  Detected Key     : {analysis.get('key_detected', 'C Major')}")
+        print(f"  Total Measures   : {analysis.get('total_measures', 0)} bars")
+        print(f"  Avg Note Density : {analysis.get('avg_density', 0)} notes/sec")
+        print(f"  Flash Memory Est : {flash_info['segments']} segments (~{flash_info['progmem_bytes']} B / {flash_info['percent']}% of ATmega328P)")
+        if analysis.get('sections'):
+            print("  Structure Map    :")
+            for s in analysis['sections']:
+                print(f"    - [{s['name']:<10}] Bars {s['start_bar']:>2}-{s['end_bar']:<2} | Energy: {int(s['avg_energy']*100)}%")
+        print("="*58)
+
+    # Determine output path
+    if out_file:
+        out_path = out_file
+    else:
+        proj_name = converter.get_project_name()
+        out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Songs", proj_name, f"{proj_name}.ino")
+
+    print(f"Generating optimized Arduino code...")
+    converter.export_arduino(out_path)
+    print(f"✅ Generated: {out_path} ({len(converter.notes)} notes)")
+
+    # Synthesize WAV Preview if requested
+    if preview_wav:
+        print(f"Rendering audio preview to '{preview_wav}'...")
+        pe = converter.get_preview_engine()
+        if pe:
+            pe.export_wav(preview_wav)
+            print(f"✅ Saved Preview Audio: {preview_wav}")
+
+    return converter, out_path
 
 def main():
-    parser = argparse.ArgumentParser(description='Convert MIDI to Arduino code for Maker UNO')
-    parser.add_argument('input_file', help='Path to input MIDI file')
-    parser.add_argument('output_file', help='Path to output .ino file')
+    parser = argparse.ArgumentParser(description='MakerUnoSong: Convert MIDI to Arduino & Flash Maker UNO without Arduino IDE')
+    parser.add_argument('input_file', nargs='?', help='Path to input MIDI file (.mid or .midi)')
+    parser.add_argument('output_file', nargs='?', help='Path to output .ino file')
+    parser.add_argument('--auto', '-a', action='store_true', help='Fully automated pipeline: auto-detect port, structure beat, compile, and flash')
+    parser.add_argument('--upload', '-u', metavar='PORT', help='Directly compile and flash to Maker UNO COM port (e.g. COM3)')
+    parser.add_argument('--batch', '-b', metavar='DIR', help='Batch convert all MIDI files in a directory')
+    parser.add_argument('--preview-wav', '-w', metavar='OUT_WAV', help='Synthesize and export an audio preview (.wav)')
+    parser.add_argument('--analyze', action='store_true', help='Print deep musical structure and energy analysis')
+    parser.add_argument('--health-check', '-hc', metavar='PORT', help='Run real-time board health and life diagnostics on COM port')
+    parser.add_argument('--list-ports', '-l', action='store_true', help='List all available serial COM ports')
+    parser.add_argument('--no-drums', action='store_true', help='Disable drum synthesis')
+    parser.add_argument('--led-mode', default='Frequency Mapped',
+                        choices=['Frequency Mapped', 'VU Meter', 'Knight Rider Scanner', 'Drum Reactive'],
+                        help='Visualizer pattern for Maker UNO 12x LEDs')
+    parser.add_argument('--drum-genre', default='Smart Adaptive AI', 
+                        choices=['Smart Adaptive AI', 'Use MIDI Track', 'Pop', 'Rock', 'Metal', 'Funk', 'Disco', 'Hip-Hop', 'Reggae'],
+                        help='Drum synthesis mode: intelligent structure thinking or classic preset')
     args = parser.parse_args()
 
-    mid = mido.MidiFile(args.input_file)
-    bpm = 120
-    time_signature = "4/4"
-    key_signature = "C"
-    song_name = os.path.basename(args.input_file)
-    artist = "Unknown"
+    # 1. List Ports
+    if args.list_ports:
+        ports = ArduinoUploader.list_ports()
+        print("\nAvailable Serial Ports:")
+        if not ports:
+            print("  No serial devices detected.")
+        for p in ports:
+            print(f"  - {p['display']}")
+        return
 
-    # Extract Meta info first
-    for track in mid.tracks:
-        for msg in track:
-            if msg.type == 'set_tempo':
-                bpm = round(mido.tempo2bpm(msg.tempo))
-            elif msg.type == 'time_signature':
-                time_signature = f"{msg.numerator}/{msg.denominator}"
-            elif msg.type == 'key_signature':
-                key_signature = msg.key
-            elif msg.type == 'track_name':
-                if song_name.endswith('.mid') or song_name.endswith('.midi'):
-                    song_name = msg.name
-            elif msg.type == 'text' and "artist" in msg.text.lower():
-                artist = msg.text
-            elif msg.type == 'copyright' and artist == "Unknown":
-                artist = msg.text
+    # 2. Health Check
+    if args.health_check:
+        run_health_check_cli(args.health_check)
+        return
 
+    # 3. Batch Conversion Mode
+    if args.batch:
+        if not os.path.isdir(args.batch):
+            print(f"❌ Error: Directory '{args.batch}' not found.")
+            sys.exit(1)
+        midi_files = glob.glob(os.path.join(args.batch, "*.mid")) + glob.glob(os.path.join(args.batch, "*.midi"))
+        if not midi_files:
+            print(f"No MIDI files found in '{args.batch}'.")
+            return
+        print(f"\n🚀 Batch processing {len(midi_files)} MIDI files from '{args.batch}'...")
+        for mf in midi_files:
+            try:
+                process_single_midi(mf, drum_mode=args.drum_genre, no_drums=args.no_drums,
+                                    led_mode=args.led_mode, analyze=args.analyze)
+            except Exception as e:
+                print(f"❌ Failed to process {mf}: {e}")
+        print(f"\n🎉 Batch conversion completed! All sketches saved in 'Songs/' folder.")
+        return
 
-    notes_output = [] # (frequency, duration_ms)
-    active_pitches = []
+    # 4. Single MIDI Conversion
+    if not args.input_file:
+        parser.print_help()
+        print("\nTip: Run 'python main.py' to launch the Desktop GUI Studio.")
+        return
 
-    arp_time_ms = 90
-    arp_index = 0
+    converter, out_path = process_single_midi(
+        args.input_file, out_file=args.output_file, drum_mode=args.drum_genre,
+        no_drums=args.no_drums, led_mode=args.led_mode, preview_wav=args.preview_wav,
+        analyze=args.analyze
+    )
 
-    for msg in mid:
-        dt = msg.time # in seconds
-        if dt > 0:
-            duration_ms = int(dt * 1000)
-            if duration_ms > 0:
-                if active_pitches:
-                    sorted_pitches = sorted(active_pitches)
-                    if len(sorted_pitches) == 1:
-                        notes_output.append((note_to_freq(sorted_pitches[0]), duration_ms))
-                    else:
-                        highest_pitch = sorted_pitches[-1]
-                        lowest_pitch = sorted_pitches[0]
-                        rem_dur = duration_ms
-                        while rem_dur > 0:
-                            if arp_index % 2 == 0:
-                                step_dur = min(60, rem_dur)
-                                notes_output.append((note_to_freq(highest_pitch), step_dur))
-                            else:
-                                step_dur = min(30, rem_dur)
-                                notes_output.append((note_to_freq(lowest_pitch), step_dur))
-                            rem_dur -= step_dur
-                            arp_index += 1
-                else:
-                    notes_output.append((0, duration_ms))
-                    arp_index = 0
-
-        if msg.type == 'note_on' and msg.velocity > 0:
-            active_pitches.append(msg.note)
-        elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
-            if msg.note in active_pitches:
-                active_pitches.remove(msg.note)
-
-    # Generate Arduino Code
-    header = f"""/*
-  Maker UNO Melody
-  Generated by Portable MIDI to Arduino Converter
-  Build by AgentHitmanFaris (NC-Engineering)
-  Detected Info -> BPM: {sanitize_cpp_comment(bpm)} | Time Sig: {sanitize_cpp_comment(time_signature)} | Key: {sanitize_cpp_comment(key_signature)}
-  Song Name: {sanitize_cpp_comment(song_name)}
-  Artist: {sanitize_cpp_comment(artist)}
-*/
-
-#include <avr/pgmspace.h>
-
-#define BUZZER_PIN 8
-
-"""
-
-    melody_array = "const int melody[] PROGMEM = {\n"
-    duration_array = "const int noteDurations[] PROGMEM = {\n"
-
-    # Memory Optimization: Merge adjacent segments with identical frequencies (especially adjacent rests)
-    optimized_notes = []
-    for freq, duration in notes_output:
-        if duration <= 0: continue
-        if optimized_notes and optimized_notes[-1][0] == freq:
-            optimized_notes[-1] = (freq, optimized_notes[-1][1] + duration)
+    # 5. Automated Pipeline or Explicit Upload
+    target_port = args.upload
+    if args.auto and not target_port:
+        # Automatically detect connected Maker UNO
+        ports = ArduinoUploader.list_ports()
+        maker_ports = [p for p in ports if p.get('is_maker_uno')]
+        if maker_ports:
+            target_port = maker_ports[0]['port']
+            print(f"\n⚡ Auto-detected Maker UNO on port: {target_port}")
+        elif ports:
+            target_port = ports[0]['port']
+            print(f"\n⚡ Using detected serial port: {target_port}")
         else:
-            optimized_notes.append((freq, duration))
+            print("\n⚠️ Auto mode: No serial ports detected. Exported .ino sketch ready for flashing.")
 
-    melody_rows = []
-    duration_rows = []
-    for i in range(0, len(optimized_notes), 10):
-        chunk = optimized_notes[i : i + 10]
-        melody_rows.append("  " + ", ".join(str(f) for f, d in chunk))
-        duration_rows.append("  " + ", ".join(str(d) for f, d in chunk))
+    if target_port:
+        print(f"\n⚡ Uploading directly to Maker UNO on {target_port}...")
+        uploader = ArduinoUploader()
+        def _cb(msg):
+            print(f"  [Uploader] {msg}")
 
-    melody_array += ",\n".join(melody_rows) + "\n};\n"
-    duration_array += ",\n".join(duration_rows) + "\n};\n"
-
-    setup_loop = f"""
-// --- TO ADJUST TEMPO: Increase for FASTER, decrease for SLOWER ---
-float tempoMultiplier = 1.0;
-
-const int noteCount = sizeof(melody) / sizeof(melody[0]);
-
-void setup() {{
-  pinMode(BUZZER_PIN, OUTPUT);
-}}
-
-void loop() {{
-  for (int i = 0; i < noteCount; i++) {{
-    int freq = pgm_read_word_near(melody + i);
-    int duration = pgm_read_word_near(noteDurations + i);
-    
-    // Apply Tempo Multiplier
-    int finalDuration = (int)(duration / tempoMultiplier);
-    
-    if (freq > 0) {{
-      // Articulation: Play for 90% of duration, 10% silence
-      tone(BUZZER_PIN, freq, finalDuration * 0.9);
-    }} else {{
-      noTone(BUZZER_PIN);
-    }}
-    
-    delay(finalDuration);
-    noTone(BUZZER_PIN);
-  }}
-  delay(2000); // Wait 2 seconds before repeating
-}}
-"""
-
-    full_code = header + melody_array + "\n" + duration_array + "\n" + setup_loop
-
-    with open(args.output_file, 'w') as f:
-        f.write(full_code)
-
-    print(f"Successfully generated {args.output_file}")
+        ok, log = uploader.compile_and_upload(out_path, target_port, progress_callback=_cb)
+        if ok:
+            print(f"\n🎉 SUCCESS: Flashed '{converter.song_name}' to Maker UNO on {target_port}!")
+        else:
+            print(f"\n❌ UPLOAD FAILED:\n{log}")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
