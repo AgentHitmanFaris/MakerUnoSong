@@ -12,9 +12,9 @@
 
 Designed specifically for the **Maker UNO** (by Cytron Technologies) and standard **Arduino UNO** (ATmega328P).
 
-## 🚀 What's New in v3.5.0
+## What's New in v3.5.0
 
-### 1. 🧠 Intelligent Structural Beat Engine (Beyond Static Presets)
+### 1. Intelligent Structural Beat Engine (Beyond Static Presets)
 - **Rhythm Thinking, Not Just Looping**: Analyzes musical energy, note density, tempo, and measure cadences rather than mechanically repeating static presets.
 - **Section-Aware Drum Synthesis**: Automatically classifies songs into structural phases:
   - `INTRO`: Subtle downbeat kick, delicate hi-hat ticks.
@@ -26,7 +26,7 @@ Designed specifically for the **Maker UNO** (by Cytron Technologies) and standar
 - **Context-Aware Cadence Fills**: Detects 4-bar and 8-bar boundaries and structural section transitions, inserting authentic drum fills (16th-note snare rolls and syncopated kick turnarounds).
 - **Musical Key & Harmonic Intelligence**: Uses Krumhansl-Schmuckler pitch class profiling to automatically detect the song's key and mode (e.g. C Major, A Minor).
 
-### 2. 🎧 Built-in Audio & Real-Time Virtual Hardware Preview
+### 2. Built-in Audio & Real-Time Virtual Hardware Preview
 - **High-Performance Audio Synthesizer**: Generates authentic in-memory 16-bit PCM WAV audio:
   - Monophonic square-wave piezo buzzer tone.
   - Sub-bass kick transients (135Hz → 42Hz frequency downward glide).
@@ -40,7 +40,7 @@ Designed specifically for the **Maker UNO** (by Cytron Technologies) and standar
 - **Interactive Piano Roll with Zoom & Auto-Scroll**: Multi-colored register/drum tracks with animated playhead, horizontal time-axis Zoom (buttons + Ctrl+Wheel), horizontal panning (Shift/Alt+Wheel), 1:1 reset, and real-time Auto-Scroll tracking.
 - **WAV Audio Export**: Export synthesized preview audio directly to `.wav` files via GUI or CLI (`--preview-wav`).
 
-### 3. ⚡ Fully Automated 1-Click Pipeline
+### 3. Fully Automated 1-Click Pipeline
 - **Zero-Configuration Workflow**:
   - **In GUI**: Click **"⚡ 1-Click Auto Pipeline"** to auto-analyze structure, generate adaptive beats, detect connected Maker UNO port, compile, and flash directly.
   - **In CLI**: Run `python midi_to_arduino.py "song.mid" --auto` for hands-free compilation and upload.
@@ -51,7 +51,7 @@ Designed specifically for the **Maker UNO** (by Cytron Technologies) and standar
   - `Knight Rider Scanner`: High-speed Larson Scanner chasing across LEDs on musical beats.
   - `Drum Reactive`: Dedicated split (Pins 3–5 Kick, Pins 6–8 Snare, Pins 10–12 Hi-Hat).
 
-### 4. 🩺 Real-Time Board Health & Life Monitor
+### 4. Real-Time Board Health & Life Monitor
 - **Internal 1.1V Bandgap Vcc Voltage Reference**: Detects USB voltage sags (<4.75V).
 - **ATmega328P Core Die Temperature**: Monitors internal MCU temperature via ADC channel 8.
 - **Dynamic SRAM Headroom**: Tracks available memory out of 2048 bytes of SRAM to prevent stack collision.
@@ -62,7 +62,7 @@ Designed specifically for the **Maker UNO** (by Cytron Technologies) and standar
 
 ---
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **[Python 3.11+](https://www.python.org/)** - Core engine, MIDI parsing, and synthesis algorithms.
 - **[PySide6 / PyQt6](https://pypi.org/project/PySide6/)** - Modern dark-themed cyber desktop GUI.
@@ -71,7 +71,7 @@ Designed specifically for the **Maker UNO** (by Cytron Technologies) and standar
 
 ---
 
-## 📖 Getting Started
+## Getting Started
 
 ### 1. Installation
 Install the required dependencies:
@@ -92,29 +92,29 @@ python main.py
 python midi_to_arduino.py "MySong (Artist).mid" --auto
 ```
 
-#### 🎵 Analyze Musical Structure & Export Audio Preview (.WAV):
+#### Analyze Musical Structure & Export Audio Preview (.WAV):
 ```powershell
 python midi_to_arduino.py "MySong (Artist).mid" --analyze --preview-wav "preview.wav"
 ```
 
-#### 📁 Batch Convert All MIDI Files in a Folder:
+#### Batch Convert All MIDI Files in a Folder:
 ```powershell
 python midi_to_arduino.py --batch "C:\Path\To\Midis"
 ```
 
-#### 💡 Choose Custom LED Mode:
+#### Choose Custom LED Mode:
 ```powershell
 python midi_to_arduino.py "MySong (Artist).mid" --led-mode "Knight Rider Scanner" --upload COM3
 ```
 
-#### 🩺 Run Real-Time Board Health Diagnostics:
+#### Run Real-Time Board Health Diagnostics:
 ```powershell
 python midi_to_arduino.py --health-check COM3
 ```
 
 ---
 
-## 🧪 Running Unit Tests
+## Running Unit Tests
 To verify all 34 unit tests:
 ```powershell
 python -m unittest discover -v
@@ -122,7 +122,7 @@ python -m unittest discover -v
 
 ---
 
-## 📋 Changelog
+## Changelog
 - **v3.5.0** - **Major Boost Release**:
   - **Intelligent Beat Structuring Engine (`smart_beat.py`)**: Musical energy curve analysis, section classification (Intro, Verse, Chorus, Bridge, Outro), melody-locked kicks, and context-aware cadence fills.
   - **Built-in Audio Preview Engine (`audio_preview.py`)**: High-performance PCM WAV synthesizer for melody square wave and white noise drum kits (kick, snare, hi-hat), with non-blocking playback, seeking, and WAV export.
