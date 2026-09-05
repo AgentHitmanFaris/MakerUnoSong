@@ -3,7 +3,7 @@
 # MakerUnoSong Studio v3.5.0
 
 <p align="center">
-  <b>Advanced MIDI to Maker UNO Studio with Intelligent Beat Structuring, Built-in Audio and Hardware Preview, 1-Click Fully Automated Pipeline, and Real-Time Board Diagnostics</b>
+ <b>Advanced MIDI to Maker UNO Studio with Intelligent Beat Structuring, Built-in Audio and Hardware Preview, 1-Click Fully Automated Pipeline, and Real-Time Board Diagnostics</b>
 </p>
 
 </div>
@@ -17,39 +17,39 @@ Designed specifically for the Cytron Maker UNO and standard Arduino UNO (ATmega3
 ### 1. Intelligent Structural Beat Engine (Beyond Static Presets)
 - **Rhythm Thinking, Not Just Looping**: Analyzes musical energy, note density, tempo, and measure cadences rather than mechanically repeating static presets.
 - **Section-Aware Drum Synthesis**: Automatically classifies songs into structural phases:
-  - `INTRO`: Subtle downbeat kick, delicate hi-hat ticks.
-  - `VERSE`: Steady foundational groove supporting the melody.
-  - `PRE-CHORUS`: Rising energy, driving four-on-the-floor kicks, building snare rolls.
-  - `CHORUS / CLIMAX`: Dynamic syncopated kicks locking in with melodic accents, crisp backbeat snares, open hi-hat drive.
-  - `BRIDGE / BREAKDOWN`: Dramatic contrast, half-time snares, kick dropouts.
-  - `OUTRO`: Decelerating groove resolving to final chord.
+ - `INTRO`: Subtle downbeat kick, delicate hi-hat ticks.
+ - `VERSE`: Steady foundational groove supporting the melody.
+ - `PRE-CHORUS`: Rising energy, driving four-on-the-floor kicks, building snare rolls.
+ - `CHORUS / CLIMAX`: Dynamic syncopated kicks locking in with melodic accents, crisp backbeat snares, open hi-hat drive.
+ - `BRIDGE / BREAKDOWN`: Dramatic contrast, half-time snares, kick dropouts.
+ - `OUTRO`: Decelerating groove resolving to final chord.
 - **Context-Aware Cadence Fills**: Detects 4-bar and 8-bar boundaries and structural section transitions, inserting authentic drum fills (16th-note snare rolls and syncopated kick turnarounds).
 - **Musical Key & Harmonic Intelligence**: Uses Krumhansl-Schmuckler pitch class profiling to automatically detect the song's key and mode (e.g. C Major, A Minor).
 
 ### 2. Built-in Audio & Real-Time Virtual Hardware Preview
 - **High-Performance Audio Synthesizer**: Generates authentic in-memory 16-bit PCM WAV audio:
-  - Monophonic square-wave piezo buzzer tone.
-  - Sub-bass kick transients (135Hz to 42Hz frequency downward glide).
-  - White noise snare bursts with resonant body.
-  - Crisp high-pass filtered metallic hi-hats.
+ - Monophonic square-wave piezo buzzer tone.
+ - Sub-bass kick transients (135Hz to 42Hz frequency downward glide).
+ - White noise snare bursts with resonant body.
+ - Crisp high-pass filtered metallic hi-hats.
 - Non-Blocking Asynchronous Playback: Uses zero-lag audio streaming with instant play/pause/seek controls and tempo scaling (0.5x to 2.0x).
 - Virtual Maker UNO Hardware Visualizer: Real-time simulated onboard hardware panel featuring:
-  - 12 Dynamic Status LEDs (Pins 2 to 13) glowing in sync with playback.
-  - Pin 8 Piezo Buzzer frequency ripple display.
-  - Pin 2 Button state indicator.
+ - 12 Dynamic Status LEDs (Pins 2 to 13) glowing in sync with playback.
+ - Pin 8 Piezo Buzzer frequency ripple display.
+ - Pin 2 Button state indicator.
 - Interactive Piano Roll with Zoom and Auto-Scroll: Multi-colored register/drum tracks with animated playhead, horizontal time-axis Zoom (buttons and Ctrl+Wheel), horizontal panning (Shift/Alt+Wheel), 1:1 reset, and real-time Auto-Scroll tracking.
 - WAV Audio Export: Export synthesized preview audio directly to .wav files via GUI or CLI (--preview-wav).
 
 ### 3. Fully Automated 1-Click Pipeline
 - **Zero-Configuration Workflow**:
-  - **In GUI**: Click **"⚡ 1-Click Auto Pipeline"** to auto-analyze structure, generate adaptive beats, detect connected Maker UNO port, compile, and flash directly.
-  - **In CLI**: Run `python midi_to_arduino.py "song.mid" --auto` for hands-free compilation and upload.
+ - **In GUI**: Click **" 1-Click Auto Pipeline"** to auto-analyze structure, generate adaptive beats, detect connected Maker UNO port, compile, and flash directly.
+ - **In CLI**: Run `python midi_to_arduino.py "song.mid" --auto` for hands-free compilation and upload.
 - **Batch Processing**: Convert entire directories of MIDI files in one command (`--batch <DIR>`).
 - **4 Selectable LED Visualizer Modes**:
-  - `Frequency Mapped` (Default): Frequency-to-pin mapping (130Hz - 2000Hz).
-  - `VU Meter`: Dynamic bar-graph volume/pitch meter across pins 2–13.
-  - `Knight Rider Scanner`: High-speed Larson Scanner chasing across LEDs on musical beats.
-  - `Drum Reactive`: Dedicated split (Pins 3–5 Kick, Pins 6–8 Snare, Pins 10–12 Hi-Hat).
+ - `Frequency Mapped` (Default): Frequency-to-pin mapping (130Hz - 2000Hz).
+ - `VU Meter`: Dynamic bar-graph volume/pitch meter across pins 2–13.
+ - `Knight Rider Scanner`: High-speed Larson Scanner chasing across LEDs on musical beats.
+ - `Drum Reactive`: Dedicated split (Pins 3–5 Kick, Pins 6–8 Snare, Pins 10–12 Hi-Hat).
 
 ### 4. Real-Time Board Health & Life Monitor
 - **Internal 1.1V Bandgap Vcc Voltage Reference**: Detects USB voltage sags (<4.75V).
@@ -62,7 +62,7 @@ Designed specifically for the Cytron Maker UNO and standard Arduino UNO (ATmega3
 
 ---
 
-## Technologies Used
+## User Manual and Instructions of Usage
 
 Complete, detailed documentation with in-depth technical references and FAQ is available in [MANUAL.md](MANUAL.md). Below are quick-start instructions for both user profiles.
 
@@ -92,6 +92,35 @@ Complete, detailed documentation with in-depth technical references and FAQ is a
 6. Physical Controls:
    Press the onboard button (Pin 2) to pause or resume playback.
 
+### Guide for Professionals and Developers
+
+1. Architecture and Pipeline:
+   - `converter.py`: Single-pass MIDI track parsing, polyphonic note arpeggiation, and PROGMEM optimization (4 bytes per segment).
+   - `smart_beat.py`: Algorithmic musical intelligence engine featuring Krumhansl-Schmuckler 24-key harmonic detection, bar energy profiling, structural section heuristics, and phrase cadence turnaround fills.
+   - `audio_preview.py`: 22.05 kHz 16-bit linear PCM WAV synthesis modeling square-wave buzzer articulation, kick sub-bass pitch sweeps, and white-noise drums. Non-blocking asynchronous playback via tempfile stream.
+   - `uploader.py`: Direct toolchain integration (avrdude / STK500v1 protocol at 115,200 baud with DTR reset toggle).
+   - `board_health.py`: Embedded telemetry monitor sampling 1.1V bandgap Vcc, ADC8 die temperature, free SRAM margin, and clock jitter.
+
+2. Flash Optimization:
+   Melody and duration arrays are stored in AVR flash via PROGMEM:
+   ```cpp
+   const int16_t melody[] PROGMEM = { ... };
+   const uint16_t noteDurations[] PROGMEM = { ... };
+   ```
+   Total flash footprint per segment is strictly 4 bytes, allowing up to ~6,900 note segments within ATmega328P capacity.
+
+3. Headless CLI Automation:
+   Refer to the CLI Usage section below for batch processing, automated pipelines, and hardware diagnostics.
+
+---
+
+## Technologies Used
+
+- [Python 3.10+](https://www.python.org/) - Core engine, MIDI parsing, and synthesis algorithms.
+- [PySide6 / PyQt6](https://pypi.org/project/PySide6/) - Dark-themed desktop GUI with responsive piano roll.
+- [pyserial](https://pypi.org/project/pyserial/) - Serial communication and telemetry protocol.
+- [mido](https://mido.readthedocs.io/) - High-precision MIDI track and meta-event parsing.
+
 ---
 
 ## Getting Started
@@ -109,7 +138,7 @@ python main.py
 
 ### 3. CLI Usage
 
-#### ⚡ Fully Automated Pipeline (Analyze, Smart Beat, Auto-Detect Port & Flash):
+#### Fully Automated Pipeline (Analyze, Smart Beat, Auto-Detect Port & Flash):
 ```powershell
 python midi_to_arduino.py "MySong (Artist).mid" --auto
 ```
@@ -137,7 +166,7 @@ python midi_to_arduino.py --health-check COM3
 ---
 
 ## Running Unit Tests
-To verify all 34 unit tests:
+To verify all 35 unit tests:
 ```powershell
 python -m unittest discover -v
 ```
@@ -146,14 +175,14 @@ python -m unittest discover -v
 
 ## Changelog
 - **v3.5.0** - **Major Boost Release**:
-  - **Intelligent Beat Structuring Engine (`smart_beat.py`)**: Musical energy curve analysis, section classification (Intro, Verse, Chorus, Bridge, Outro), melody-locked kicks, and context-aware cadence fills.
-  - **Built-in Audio Preview Engine (`audio_preview.py`)**: High-performance PCM WAV synthesizer for melody square wave and white noise drum kits (kick, snare, hi-hat), with non-blocking playback, seeking, and WAV export.
-  - **Virtual Maker UNO Hardware Visualizer**: Real-time simulated 12x LEDs, Pin 8 buzzer, and Pin 2 button animation in GUI.
-  - **Interactive Piano Roll**: Animated playhead cursor, note scrubbing, and color-coded pitch registers.
-  - **1-Click Auto Pipeline**: Fully automated 1-click execution in GUI and `--auto` in CLI.
-  - **Batch Conversion & Analysis**: `--batch <DIR>` and `--analyze` flags.
-  - **4 LED Visualizer Modes**: Frequency Mapped, VU Meter, Knight Rider Scanner, and Drum Reactive.
-  - Complete test suite expanded from 17 to 34 tests passing.
+ - **Intelligent Beat Structuring Engine (`smart_beat.py`)**: Musical energy curve analysis, section classification (Intro, Verse, Chorus, Bridge, Outro), melody-locked kicks, and context-aware cadence fills.
+ - **Built-in Audio Preview Engine (`audio_preview.py`)**: High-performance PCM WAV synthesizer for melody square wave and white noise drum kits (kick, snare, hi-hat), with non-blocking playback, seeking, and WAV export.
+ - **Virtual Maker UNO Hardware Visualizer**: Real-time simulated 12x LEDs, Pin 8 buzzer, and Pin 2 button animation in GUI.
+ - **Interactive Piano Roll with Zoom and Auto-Scroll**: Animated playhead cursor, timeline zooming, horizontal panning, and playhead auto-scroll tracking.
+ - **1-Click Auto Pipeline**: Fully automated 1-click execution in GUI and `--auto` in CLI.
+ - **Batch Conversion & Analysis**: `--batch <DIR>` and `--analyze` flags.
+ - **4 LED Visualizer Modes**: Frequency Mapped, VU Meter, Knight Rider Scanner, and Drum Reactive.
+ - Complete test suite expanded to 35 tests passing.
 - **v3.0.0**: Standalone Direct Uploader, Board Health Diagnostics, Maker UNO 12x LED Sync.
 - **v2.2.0**: Single-pass MIDI parsing, LRU-cached frequency calculations.
 
