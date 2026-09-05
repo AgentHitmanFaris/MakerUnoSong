@@ -3,14 +3,14 @@
 # MakerUnoSong Studio v3.5.0
 
 <p align="center">
-  <b>Advanced MIDI to Maker UNO Studio with Intelligent Beat Structuring, Built-in Audio & Hardware Preview, 1-Click Fully Automated Pipeline & Real-Time Board Diagnostics!</b>
+  <b>Advanced MIDI to Maker UNO Studio with Intelligent Beat Structuring, Built-in Audio and Hardware Preview, 1-Click Fully Automated Pipeline, and Real-Time Board Diagnostics</b>
 </p>
 
 </div>
 
 ---
 
-Designed specifically for the **Maker UNO** (by Cytron Technologies) and standard **Arduino UNO** (ATmega328P).
+Designed specifically for the Cytron Maker UNO and standard Arduino UNO (ATmega328P).
 
 ## What's New in v3.5.0
 
@@ -29,16 +29,16 @@ Designed specifically for the **Maker UNO** (by Cytron Technologies) and standar
 ### 2. Built-in Audio & Real-Time Virtual Hardware Preview
 - **High-Performance Audio Synthesizer**: Generates authentic in-memory 16-bit PCM WAV audio:
   - Monophonic square-wave piezo buzzer tone.
-  - Sub-bass kick transients (135Hz → 42Hz frequency downward glide).
+  - Sub-bass kick transients (135Hz to 42Hz frequency downward glide).
   - White noise snare bursts with resonant body.
   - Crisp high-pass filtered metallic hi-hats.
-- **Non-Blocking Asynchronous Playback**: Uses zero-lag audio streaming with instant play/pause/seek controls and tempo scaling (0.5x to 2.0x).
-- **Virtual Maker UNO Hardware Visualizer**: Real-time simulated onboard hardware panel featuring:
+- Non-Blocking Asynchronous Playback: Uses zero-lag audio streaming with instant play/pause/seek controls and tempo scaling (0.5x to 2.0x).
+- Virtual Maker UNO Hardware Visualizer: Real-time simulated onboard hardware panel featuring:
   - 12 Dynamic Status LEDs (Pins 2 to 13) glowing in sync with playback.
   - Pin 8 Piezo Buzzer frequency ripple display.
   - Pin 2 Button state indicator.
-- **Interactive Piano Roll with Zoom & Auto-Scroll**: Multi-colored register/drum tracks with animated playhead, horizontal time-axis Zoom (buttons + Ctrl+Wheel), horizontal panning (Shift/Alt+Wheel), 1:1 reset, and real-time Auto-Scroll tracking.
-- **WAV Audio Export**: Export synthesized preview audio directly to `.wav` files via GUI or CLI (`--preview-wav`).
+- Interactive Piano Roll with Zoom and Auto-Scroll: Multi-colored register/drum tracks with animated playhead, horizontal time-axis Zoom (buttons and Ctrl+Wheel), horizontal panning (Shift/Alt+Wheel), 1:1 reset, and real-time Auto-Scroll tracking.
+- WAV Audio Export: Export synthesized preview audio directly to .wav files via GUI or CLI (--preview-wav).
 
 ### 3. Fully Automated 1-Click Pipeline
 - **Zero-Configuration Workflow**:
@@ -64,10 +64,33 @@ Designed specifically for the **Maker UNO** (by Cytron Technologies) and standar
 
 ## Technologies Used
 
-- **[Python 3.11+](https://www.python.org/)** - Core engine, MIDI parsing, and synthesis algorithms.
-- **[PySide6 / PyQt6](https://pypi.org/project/PySide6/)** - Modern dark-themed cyber desktop GUI.
-- **[pyserial](https://pypi.org/project/pyserial/)** - Serial communication and telemetry protocol.
-- **[mido](https://mido.readthedocs.io/)** - High-precision MIDI track and meta-event parsing.
+Complete, detailed documentation with in-depth technical references and FAQ is available in [MANUAL.md](MANUAL.md). Below are quick-start instructions for both user profiles.
+
+### Guide for Beginners and Non-Technical Users
+
+1. Connect your Maker UNO:
+   Plug your Maker UNO into any computer USB port using your USB cable. A green power LED will turn on.
+
+2. Launch MakerUnoSong Studio:
+   Run the following command:
+   ```powershell
+   python main.py
+   ```
+
+3. Load a Song:
+   Click "Load MIDI" and select any `.mid` or `.midi` file.
+
+4. Preview and Listen:
+   - Click "Play Preview" to hear the buzzer melody and drums right through your computer speakers.
+   - Watch the virtual 12 LEDs and buzzer frequency meter flash in sync.
+   - Use the Zoom buttons ("Zoom +", "Zoom -", "1:1") or hold Ctrl and use your mouse wheel to zoom the notes.
+   - Keep "Auto-Scroll" enabled so the screen follows along with the music.
+
+5. Flash to Maker UNO:
+   Click the green "1-Click Auto Pipeline" button. The app will automatically find your board, compile the sketch, and upload it. The board will begin playing immediately!
+
+6. Physical Controls:
+   Press the onboard button (Pin 2) to pause or resume playback.
 
 ---
 
@@ -79,8 +102,7 @@ Install the required dependencies:
 pip install -r requirements.txt
 ```
 
-### 2. Launching the Desktop Studio
-Run the GUI application:
+### 2. Launching Desktop Studio
 ```powershell
 python main.py
 ```
@@ -136,4 +158,4 @@ python -m unittest discover -v
 - **v2.2.0**: Single-pass MIDI parsing, LRU-cached frequency calculations.
 
 ---
-*Maintained by AgentHitmanFaris (NC-Engineering).*
+Maintained by AgentHitmanFaris (NC-Engineering).
